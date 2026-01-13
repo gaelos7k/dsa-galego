@@ -1,0 +1,40 @@
+Em nível mais baixo de computação, um array pode ser entendido como uma região contínua de memória, onde todos os elementos possuem o mesmo tamanho e são armazenados de forma sequencial. Essa continuidade é o que permite acesso direto aos elementos, sem necessidade de percorrer a estrutura.
+
+Do ponto de vista conceitual, essa memória pode ser vista como uma sequência de bits agrupados em elementos de tamanho fixo. Por exemplo, o mesmo bloco de memória pode ser interpretado de maneiras diferentes, dependendo do tamanho do elemento:
+
+[1111 0000 1111 0000]  → 4 elementos de 4 bits (exemplo conceitual)
+[11110000 11110000]    → 2 elementos de 8 bits
+
+
+Esses exemplos ilustram que o que define o “elemento” não é a memória em si, mas a forma como ela é interpretada.
+
+O acesso por índice em arrays de baixo nível funciona porque o endereço de um elemento pode ser calculado matematicamente a partir do endereço base do array. De forma geral, esse cálculo segue a lógica:
+
+endereço_do_elemento = endereço_base + (índice × tamanho_do_elemento)
+
+
+Assim, considerando um array cujos elementos possuem 32 bits (4 bytes), o primeiro elemento está no deslocamento 32 bits × 0, o segundo em 32 bits × 1, e assim por diante. Dessa forma, por exemplo, o oitavo elemento está localizado após 32 bits × 7 a partir do endereço base. Esse mecanismo explica por que o acesso por índice ocorre em tempo constante.
+
+É importante distinguir esse modelo de baixo nível do conceito de array em JavaScript. Na linguagem, arrays comuns são tratados como objetos, e não como estruturas de memória contínuas no sentido estrito. Isso permite comportamentos flexíveis — como crescimento dinâmico, índices não sequenciais e tipos mistos — mas também significa que não há garantia de um layout físico contíguo como em linguagens de mais baixo nível.
+
+Quando é necessário trabalhar explicitamente com memória binária contínua em JavaScript, utiliza-se o ArrayBuffer, que representa um bloco fixo de memória endereçado em bytes. Esse buffer, por si só, não define como os dados devem ser acessados ou interpretados.
+
+Considere o exemplo:
+
+const a = new ArrayBuffer(8)
+
+
+Nesse caso, são alocados 8 bytes de memória contínua. Para acessar e interpretar esses dados, criam-se visões tipadas sobre o mesmo buffer:
+
+const a32 = new Uint32Array(a)
+const a8 = new Uint8Array(a)
+
+
+A Uint32Array interpreta o buffer como dois elementos de 32 bits, enquanto a Uint8Array o interpreta como oito elementos de 8 bits. Ambas compartilham exatamente o mesmo espaço de memória; nenhuma alocação adicional ocorre.
+
+Ao atribuir um valor ao primeiro elemento da Uint32Array:
+
+a32[0] = 4294967295
+
+
+todos os 32 bits correspondentes são definidos como 1. Essa alteração é imediatamente refletida na Uint8Array, que passa a expor os mesmos bits organizados byte a byte. Esse comportamento demonstra claramente a separação entre armazenamento físico dos dados e interpretação lógica, aproximando o JavaScript, nesse contexto específico, do modelo de programação de mais baixo nível.
